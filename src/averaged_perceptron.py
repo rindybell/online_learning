@@ -9,7 +9,7 @@ import sys
 import os
 import argparse
 import numpy as np
-from sklearn import metrics
+from sklearn import metric
 from scipy import sparse
 import scipy
 
