@@ -9,7 +9,7 @@ import sys
 import os
 import argparse
 import numpy as np
-from sklearn import metric
+from sklearn import metrics
 from scipy import sparse
 import scipy
 
@@ -26,7 +26,7 @@ class AveragedPerceptron:
         self.verbose = verbose
         # self.bias = np.zeros (output_dim)
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, valid_X, valid_Y):
         iters = 1
         # X = sparse.csr_matrix(X)
         # Y = sparse.csr_matrix(Y)
@@ -56,17 +56,14 @@ class AveragedPerceptron:
                     iters += 1
 
             if self.verbose > 0:
-                preds = self.predict(X)
-                print self.accuracy(preds, Y)
+                preds = self.predict(valid_X)
+                print self.accuracy(preds, valid_Y)
 
             # is convergence ?
             if roop_end:
                 break
 
         self.weight = self.iter_weight - (self.weight / iters)
-        # print self.weight
-        preds = self.predict(X)
-        print self.accuracy(preds, Y)
 
     def accuracy(self, golds, preds):
         accuracy = metrics.accuracy_score(golds,
@@ -83,19 +80,22 @@ class AveragedPerceptron:
 def main(options={}):
     from sklearn.datasets import load_digits
     digits = load_digits()
-    print dir(digits)
     (input_dims, output_dims) = (
         digits.data.shape[1], len(digits.target_names))
 
-    X = digits.data
-    Y = digits.target
-    print (input_dims, output_dims)
-    print X.shape, Y.shape
+    train_X = digits.data[:1600]
+    train_Y = digits.target[:1600]
+
+    dev_X = digits.data[1600:1700]
+    dev_Y = digits.target[1600:1700]
+
+    test_X = digits.data[1700:]
+    test_Y = digits.target[1700:]
 
     AP = AveragedPerceptron(
         input_dims, output_dims, max_iteration=1000, verbose=1)
-    AP.fit(X, Y)
-    print AP.accuracy(Y, AP.predict(X))
+    AP.fit(train_X, train_Y, dev_X, dev_Y)
+    print AP.accuracy(test_Y, AP.predict(test_X))
 
 
 if __name__ == "__main__":
